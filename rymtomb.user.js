@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RYM to MusicBrainz Importer
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Import albums from RateYourMusic to MusicBrainz
 // @author       Your Name
 // @match        https://rateyourmusic.com/release/album/*
@@ -12,24 +12,37 @@
 (function() {
     'use strict';
 
+    // Check if jQuery is loaded
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery not loaded!');
+        return;
+    } else {
+        console.log('jQuery loaded successfully.');
+    }
+
     // Function to extract album data from RYM page
     function fetchRYMAlbumData() {
         let albumData = {};
 
         // Title
         albumData.title = $('div.album_title > h1').text().trim();
+        console.log('Album title:', albumData.title);
 
         // Artist
         albumData.artist = $('div.album_title > h2').text().trim();
+        console.log('Artist:', albumData.artist);
 
         // Release Date
         albumData.releaseDate = $('tr.release_date > td').text().trim();
+        console.log('Release Date:', albumData.releaseDate);
 
         // Label
         albumData.label = $('tr.label').text().trim();
+        console.log('Label:', albumData.label);
 
-        // Format (e.g., LP, CD)
+        // Format
         albumData.format = $('tr.format').text().trim();
+        console.log('Format:', albumData.format);
 
         // Tracklist
         albumData.tracks = [];
@@ -39,6 +52,7 @@
                 title: $(this).find('td.track_title').text().trim(),
                 length: $(this).find('td.track_time').text().trim()
             };
+            console.log('Track:', track);
             albumData.tracks.push(track);
         });
 
@@ -61,13 +75,13 @@
             length: track.length
         }));
 
+        console.log('Formatted data for MusicBrainz:', mbData);
         return mbData;
     }
 
     // Function to submit data to MusicBrainz
     function submitToMusicBrainz(mbData) {
         // This function will handle the API calls or form submission to MusicBrainz
-        // For demonstration, let's log the formatted data
         console.log('Data ready for MusicBrainz submission:', mbData);
 
         // You can integrate with MusicBrainz API here to automate the submission
@@ -89,12 +103,14 @@
                 'cursor': 'pointer'
             })
             .click(function() {
+                console.log('Import button clicked');
                 let albumData = fetchRYMAlbumData();
                 let mbData = formatForMusicBrainz(albumData);
                 submitToMusicBrainz(mbData);
             });
 
         $('body').append(button);
+        console.log('Import button added to the page');
     }
 
     // Main execution flow
